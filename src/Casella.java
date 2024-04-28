@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Casella extends JPanel {
-    private static final int LATO = TwentyFourtyEight.LARGHEZZA_FINESTRA / TwentyFourtyEight.CASELLE_PER_LATO - 2 * TwentyFourtyEight.GAP_FRA_CASELLE;
+    public static final int LATO = (TwentyFourtyEight.LARGHEZZA_FINESTRA - TwentyFourtyEight.ALTEZZA_PANNELLO_PUNTEGGIO) / TwentyFourtyEight.CASELLE_PER_LATO - 2 * TwentyFourtyEight.GAP_FRA_CASELLE;
     private static final int[] NUMERI_GENERAZIONE = new int[] {2,4};
     private int numero;
     private JTextArea etichettaNumero = new JTextArea();
@@ -20,7 +20,7 @@ public class Casella extends JPanel {
     };
 
     public Casella() {
-        setPreferredSize(new Dimension(LATO, LATO));
+//        setPreferredSize(new Dimension(LATO, LATO));
         setLayout(new GridBagLayout());
 
         etichettaNumero.setEditable(false);
@@ -58,12 +58,11 @@ public class Casella extends JPanel {
     }
 
     private void aggiornaEtichettaNumero() {
-        String numeroVecchio = etichettaNumero.getText();
         String numeroString = "";
         if (numero != 0) {
             numeroString = "" + numero;
         }
-        etichettaNumero.replaceRange(numeroString, 0, numeroVecchio.length());
+        etichettaNumero.setText(numeroString);
     }
 
     @Override

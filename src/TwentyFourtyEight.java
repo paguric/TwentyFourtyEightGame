@@ -8,15 +8,18 @@ import java.awt.event.KeyListener;
 import java.util.Random;
 
 public class TwentyFourtyEight {
+    public static final Random RANDOM = new Random();
     public static final int CASELLE_PER_LATO = 4;
     public static final int LARGHEZZA_FINESTRA = 720;
     public static final int ALTEZZA_FINESTRA = 720;
     public static final int GAP_FRA_CASELLE = 10;
+    public static final int ALTEZZA_PANNELLO_PUNTEGGIO = 60;
+    private static final float DIMENSIONE_TESTO = 22f;
     private static TwentyFourtyEight istanza = null;
-    private static final JFrame finestra = new JFrame();
-    public static final Random RANDOM = new Random();
     private static Casella caselle[][] = new Casella[CASELLE_PER_LATO][CASELLE_PER_LATO];
-    private static boolean caselleLibere = true;
+    private static int punteggio = 0;
+    private static final JFrame finestra = new JFrame();
+    private static JTextArea testoPunteggio = new JTextArea("" + punteggio);
 
     private TwentyFourtyEight() {
         finestra.setSize(LARGHEZZA_FINESTRA, ALTEZZA_FINESTRA);
@@ -60,16 +63,14 @@ public class TwentyFourtyEight {
         return istanza;
     }
     public void mostraSchermataIniziale() {
-//        JPanel schermataIniziale = new JPanel(new GridLayout(2,1));
         JPanel schermataIniziale = new JPanel(new GridBagLayout());
         schermataIniziale.setPreferredSize(new Dimension(LARGHEZZA_FINESTRA, ALTEZZA_FINESTRA));
 
         JTextArea testo = new JTextArea("2048");
-//        testo.setPreferredSize(new Dimension(100, 100));
         testo.setEditable(false);
         testo.setHighlighter(null);
         testo.setBackground(null);
-        testo.setFont(testo.getFont().deriveFont(58f));
+        testo.setFont(testo.getFont().deriveFont(DIMENSIONE_TESTO * 2));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -78,7 +79,7 @@ public class TwentyFourtyEight {
         schermataIniziale.add(testo, gbc);
 
         JButton bottone = new JButton("Nuova partita");
-        bottone.setFont(testo.getFont().deriveFont(22f));
+        bottone.setFont(testo.getFont().deriveFont(DIMENSIONE_TESTO));
         bottone.setPreferredSize(new Dimension(LARGHEZZA_FINESTRA / 4, ALTEZZA_FINESTRA / 6));
         bottone.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
         bottone.setBackground(Color.GRAY);
@@ -95,25 +96,46 @@ public class TwentyFourtyEight {
     private void iniziaPartita() {
         finestra.getContentPane().removeAll();
 
+        JPanel pannelloGioco = new JPanel();
+        pannelloGioco.setPreferredSize(new Dimension(LARGHEZZA_FINESTRA, ALTEZZA_FINESTRA));
+
         JPanel griglia = new JPanel();
 
         griglia.setLayout(new GridLayout(CASELLE_PER_LATO, CASELLE_PER_LATO, GAP_FRA_CASELLE, GAP_FRA_CASELLE));
-        griglia.setPreferredSize(new Dimension(LARGHEZZA_FINESTRA, ALTEZZA_FINESTRA));
+
         for (int i = 0; i < CASELLE_PER_LATO; i++) {
             for (int j = 0; j < CASELLE_PER_LATO; j++) {
                 caselle[i][j] = new Casella();
                 griglia.add(caselle[i][j]);
             }
         }
+        
+        griglia.setPreferredSize(new Dimension(CASELLE_PER_LATO * Casella.LATO, CASELLE_PER_LATO * Casella.LATO));
 
-        finestra.add(griglia);
+        pannelloGioco.add(griglia);
+
+        JPanel pannelloTesto = new JPanel(new GridBagLayout());
+        pannelloTesto.setPreferredSize(new Dimension(LARGHEZZA_FINESTRA, ALTEZZA_PANNELLO_PUNTEGGIO));
+
+        testoPunteggio.setEditable(false);
+        testoPunteggio.setHighlighter(null);
+        testoPunteggio.setBackground(null);
+        testoPunteggio.setFont(testoPunteggio.getFont().deriveFont(DIMENSIONE_TESTO));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        pannelloTesto.add(testoPunteggio, gbc);
+        pannelloGioco.add(pannelloTesto);
+
+        finestra.add(pannelloGioco);
 
         // inizializza prime due caselle
         generaCasella();
         generaCasella();
 
         finestra.revalidate();
-        System.out.println("caca");     // TEST
     }
 
     private void generaCasella() {
@@ -209,6 +231,7 @@ public class TwentyFourtyEight {
                         prossimaRiga = calcolaProssimaRiga(direzioneInversa, i);
                         if (unionePossibile(direzione, prossimaRiga, j)) {
                             caselle[i][j].raddoppia();
+                            punteggio += caselle[i][j].getNumero();
                             caselle[prossimaRiga][j].setNumero(0);
                             casellaUnita = true;
                         }
@@ -223,6 +246,7 @@ public class TwentyFourtyEight {
                         prossimaRiga = calcolaProssimaRiga(direzioneInversa, i);
                         if (unionePossibile(direzione, prossimaRiga, j)) {
                             caselle[i][j].raddoppia();
+                            punteggio += caselle[i][j].getNumero();
                             caselle[prossimaRiga][j].setNumero(0);
                             casellaUnita = true;
                         }
@@ -237,6 +261,7 @@ public class TwentyFourtyEight {
                         prossimaColonna = calcolaProssimaColonna(direzioneInversa, j);
                         if (unionePossibile(direzione, i, prossimaColonna)) {
                             caselle[i][j].raddoppia();
+                            punteggio += caselle[i][j].getNumero();
                             caselle[i][prossimaColonna].setNumero(0);
                             casellaUnita = true;
                         }
@@ -251,6 +276,7 @@ public class TwentyFourtyEight {
                         prossimaColonna = calcolaProssimaColonna(direzioneInversa, j);
                         if (unionePossibile(direzione, i, prossimaColonna)) {
                             caselle[i][j].raddoppia();
+                            punteggio += caselle[i][j].getNumero();
                             caselle[i][prossimaColonna].setNumero(0);
                             casellaUnita = true;
                         }
@@ -259,6 +285,8 @@ public class TwentyFourtyEight {
             }
 
         }
+
+        testoPunteggio.setText("Punteggio: " + punteggio);
 
         return casellaUnita;
     }
@@ -333,19 +361,54 @@ public class TwentyFourtyEight {
     private void terminaPartita() {
         finestra.getContentPane().removeAll();
 
+        JPanel schermataFinale = new JPanel();
+        schermataFinale.setPreferredSize(new Dimension(LARGHEZZA_FINESTRA, ALTEZZA_FINESTRA));
+        schermataFinale.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
         JTextArea testo = new JTextArea("Hai perso!");
         testo.setEditable(false);
         testo.setHighlighter(null);
         testo.setBackground(null);
-        testo.setFont(testo.getFont().deriveFont(45f));
+        testo.setFont(testo.getFont().deriveFont(DIMENSIONE_TESTO * 3/2));
 
-        JPanel schermataFinale = new JPanel();
-        schermataFinale.setPreferredSize(new Dimension(LARGHEZZA_FINESTRA, ALTEZZA_FINESTRA));
-        schermataFinale.setLayout(new GridBagLayout());
-        schermataFinale.add(testo);
+        JButton giocaAncora = new JButton("Gioca ancora");
+        giocaAncora.setFont(testo.getFont().deriveFont(DIMENSIONE_TESTO * 2 /3));
+        giocaAncora.addActionListener(e -> {
+            riavviaPartita();
+        });
+
+        JButton chiudiFinestra = new JButton("Torna al desktop");
+        chiudiFinestra.setFont(testo.getFont().deriveFont(DIMENSIONE_TESTO * 2 /3));
+        chiudiFinestra.addActionListener(e -> finestra.dispose());
+
+        schermataFinale.add(testo, gbc);
+
+        gbc.gridy++;
+        schermataFinale.add(testoPunteggio, gbc);
+
+        gbc.gridy++;
+        schermataFinale.add(giocaAncora, gbc);
+
+        gbc.gridx++;
+        schermataFinale.add(chiudiFinestra, gbc);
 
         finestra.add(schermataFinale);
         finestra.revalidate();
+    }
+
+    private void riavviaPartita() {
+        punteggio = 0;
+        for (int i = 0; i < CASELLE_PER_LATO; i++) {
+            for (int j = 0; j < CASELLE_PER_LATO; j++) {
+                caselle[i][j].setNumero(0);
+            }
+        }
+
+        iniziaPartita();
     }
 
 }
